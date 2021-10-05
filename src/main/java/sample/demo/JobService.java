@@ -7,6 +7,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sample.demo.exception.ResourceNotFoundException;
 
 import javax.transaction.Transactional;
 import java.time.Duration;
@@ -44,7 +45,13 @@ public class JobService {
     }
 
     public JobEntity updateJobInfo(final Long jobId) throws InterruptedException {
-        JobEntity jobEntity = jobRepository.findById(jobId).get();
+
+        JobEntity jobEntity = new JobEntity();
+        if(jobRepository.findById(jobId).isPresent()) {
+            jobRepository.findById(jobId).get();
+        } else {
+            throw new ResourceNotFoundException("Job with id: "+ jobId+" is not present");
+        }
 
         jobEntity.setStatus("Done");
         Thread.sleep((long)(Math.random() * (4000)) + 1000);
